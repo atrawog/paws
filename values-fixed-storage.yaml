@@ -1,0 +1,101 @@
+# Fixed configuration with writable storage for user pods
+localdev:
+  enabled: false
+
+pawsPublicEnabled: false
+minesweeper:
+  enabled: false
+
+paws:
+  frontPageEnabled: false
+
+jupyterhub:
+  hub:
+    config:
+      DummyAuthenticator:
+        password: admin
+      JupyterHub:
+        authenticator_class: dummy
+    
+    extraConfig:
+      00-myConfig: |
+        localdev = False
+      10-myConfig: |
+        pass
+      20-dummy-auth: |
+        from jupyterhub.auth import DummyAuthenticator
+        c.JupyterHub.authenticator_class = DummyAuthenticator
+        c.DummyAuthenticator.password = 'admin'
+        print("Forced DummyAuthenticator override applied")
+    
+    db:
+      type: sqlite-memory
+    networkPolicy:
+      enabled: false
+    image:
+      name: quay.io/jupyterhub/k8s-hub
+      tag: "3.3.8"
+    
+  proxy:
+    service:
+      type: NodePort
+    chp:
+      networkPolicy:
+        enabled: false
+      image:
+        name: quay.io/jupyterhub/configurable-http-proxy
+        tag: "4.6.1"
+  
+  singleuser:
+    image:
+      name: quay.io/jupyterhub/k8s-singleuser-sample
+      tag: "3.3.8"
+    
+    # Fix: Use emptyDir volume for user home directory
+    storage:
+      type: static
+      extraVolumes:
+        - name: home
+          emptyDir: {}
+      extraVolumeMounts:
+        - name: home
+          mountPath: /home/jovyan
+          
+    # Alternative: Use dynamic PVC (commented out)
+    # storage:
+    #   type: dynamic
+    #   capacity: 1Gi
+    #   dynamic:
+    #     storageClass: standard
+    
+    networkPolicy:
+      enabled: false
+    cpu:
+      limit: 0.5
+      guarantee: 0.1
+    memory:
+      limit: 512M
+      guarantee: 256M
+    
+    # Increase timeout for slower systems
+    startTimeout: 600
+  
+  prePuller:
+    hook:
+      enabled: false
+    continuous:
+      enabled: false
+  
+  scheduling:
+    userScheduler:
+      enabled: false
+    podPriority:
+      enabled: false
+    userPlaceholder:
+      enabled: false
+  
+  debug:
+    enabled: true  # Enable debug for troubleshooting
+  
+  ingress:
+    enabled: false
