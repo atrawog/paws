@@ -1,0 +1,32 @@
+localdev:
+  enabled: true
+
+# Disable ingresses for local development
+pawsPublicEnabled: false
+
+paws:
+  frontPageEnabled: false
+
+jupyterhub:
+  hub:
+    image:
+      name: quay.io/jupyterhub/k8s-hub
+      tag: "3.3.8"
+    db:
+      type: sqlite-memory
+  ingress:
+    enabled: false
+  proxy:
+    service:
+      type: NodePort
+  singleuser:
+    image:
+      name: quay.io/jupyterhub/k8s-singleuser-sample
+      tag: "3.3.8"
+    storage:
+      type: none
+  prePuller:
+    hook:
+      enabled: false
+    continuous:
+      enabled: false

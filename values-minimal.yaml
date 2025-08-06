@@ -1,0 +1,54 @@
+# Minimal configuration for local development
+localdev:
+  enabled: false
+
+# Disable PAWS-specific features
+pawsPublicEnabled: false
+paws:
+  frontPageEnabled: false
+minesweeper:
+  enabled: false
+
+# Use standard JupyterHub configuration
+jupyterhub:
+  hub:
+    image:
+      name: quay.io/jupyterhub/k8s-hub
+      tag: "3.3.8"
+    db:
+      type: sqlite-memory
+    config:
+      DummyAuthenticator:
+        password: password
+      JupyterHub:
+        authenticator_class: dummy
+  
+  proxy:
+    service:
+      type: NodePort
+    chp:
+      image:
+        name: quay.io/jupyterhub/configurable-http-proxy
+        tag: "4.6.2"
+  
+  ingress:
+    enabled: false
+  
+  singleuser:
+    image:
+      name: quay.io/jupyterhub/k8s-singleuser-sample
+      tag: "3.3.8"
+    storage:
+      type: dynamic
+      dynamic:
+        storageClass: standard
+  
+  scheduling:
+    userScheduler:
+      enabled: false
+  
+  prePuller:
+    hook:
+      enabled: false
+    continuous:
+      enabled: false

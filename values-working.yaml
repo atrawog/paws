@@ -1,0 +1,75 @@
+# Working PAWS configuration for local development
+# Based on successful JupyterHub deployment
+
+# Disable problematic PAWS features
+localdev:
+  enabled: false  # Disable localdev to avoid hostPath volume issues
+
+pawsPublicEnabled: false  # Disable public notebook viewing
+minesweeper:
+  enabled: false  # Disable minesweeper security monitoring
+
+paws:
+  frontPageEnabled: false  # Disable custom front page
+
+# Use working JupyterHub configuration
+jupyterhub:
+  hub:
+    config:
+      DummyAuthenticator:
+        password: admin
+      JupyterHub:
+        authenticator_class: dummy
+        spawner_class: kubespawner.KubeSpawner
+    db:
+      type: sqlite-memory
+    networkPolicy:
+      enabled: false
+    image:
+      name: quay.io/jupyterhub/k8s-hub
+      tag: "3.3.8"
+    
+  proxy:
+    service:
+      type: NodePort
+    chp:
+      networkPolicy:
+        enabled: false
+      image:
+        name: quay.io/jupyterhub/configurable-http-proxy
+        tag: "4.6.1"
+  
+  singleuser:
+    image:
+      name: quay.io/jupyterhub/k8s-singleuser-sample
+      tag: "3.3.8"
+    storage:
+      type: none
+    networkPolicy:
+      enabled: false
+    cpu:
+      limit: 0.5
+      guarantee: 0.1
+    memory:
+      limit: 512M
+      guarantee: 256M
+  
+  prePuller:
+    hook:
+      enabled: false
+    continuous:
+      enabled: false
+  
+  scheduling:
+    userScheduler:
+      enabled: false
+    podPriority:
+      enabled: false
+    userPlaceholder:
+      enabled: false
+  
+  debug:
+    enabled: false
+  
+  ingress:
+    enabled: false
